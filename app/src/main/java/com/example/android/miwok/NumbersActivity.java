@@ -16,8 +16,8 @@
 package com.example.android.miwok;
 
 import android.os.Bundle;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -42,11 +42,8 @@ public class NumbersActivity extends AppCompatActivity {
         words.add("nine");
         words.add("ten");
 
-        LinearLayout rootView = findViewById(R.id.rootView);
-        for (int i = 0; i < words.size(); ++i) {
-            TextView textView = new TextView(this);
-            textView.setText(words.get(i));
-            rootView.addView(textView);
-        }
+        ArrayAdapter<String> itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, words);
+        ListView gridView = findViewById(R.id.list);
+        gridView.setAdapter(itemsAdapter);
     }
 }
