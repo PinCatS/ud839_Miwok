@@ -6,17 +6,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
 public class WordAdapter extends ArrayAdapter<Word> {
 
-    public WordAdapter(Activity context, ArrayList<Word> words) {
+    private int mColorResourceId;
+
+    public WordAdapter(Activity context, ArrayList<Word> words, int colorResourceId) {
         super(context, 0, words);
+        mColorResourceId = colorResourceId;
     }
 
     @NonNull
@@ -35,6 +40,10 @@ public class WordAdapter extends ArrayAdapter<Word> {
 
         textView = listItemView.findViewById(R.id.english_item);
         textView.setText(currentWord.getDefaulTranslation());
+
+        LinearLayout linearLayout = listItemView.findViewById(R.id.word_wrapper);
+        int color = ContextCompat.getColor(getContext(), mColorResourceId);
+        linearLayout.setBackgroundColor(color);
 
         ImageView imageView = listItemView.findViewById(R.id.image);
 

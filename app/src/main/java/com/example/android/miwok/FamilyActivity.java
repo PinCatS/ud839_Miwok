@@ -41,7 +41,7 @@ public class FamilyActivity extends AppCompatActivity {
         words.add(new Word("ama", "grandmother", R.drawable.family_grandmother));
         words.add(new Word("paapa", "grandfather", R.drawable.family_grandfather));
 
-        WordAdapter itemsAdapter = new WordAdapter(this, words);
+        WordAdapter itemsAdapter = new WordAdapter(this, words, R.color.category_family);
         ListView listView = findViewById(R.id.word_list);
         listView.setAdapter(itemsAdapter);
     }
