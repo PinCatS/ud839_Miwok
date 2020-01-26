@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -54,14 +53,6 @@ public class WordAdapter extends ArrayAdapter<Word> {
         } else {
             imageView.setVisibility(View.GONE);
         }
-
-        Button playButton = listItemView.findViewById(R.id.play_button);
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentWord.getAudio().start();
-            }
-        });
 
         return listItemView;
     }
