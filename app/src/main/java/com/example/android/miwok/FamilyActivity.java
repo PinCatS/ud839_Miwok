@@ -15,6 +15,10 @@
  */
 package com.example.android.miwok;
 
+import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +32,9 @@ import java.util.ArrayList;
 public class FamilyActivity extends AppCompatActivity {
 
     private MediaPlayer mMediaPlayer;
+    private AudioManager mAudioManager;
+    private AudioAttributes mPlaybackAttributes;
+    private AudioFocusRequest mFocusRequest;
 
     private MediaPlayer.OnCompletionListener mCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
@@ -57,13 +64,51 @@ public class FamilyActivity extends AppCompatActivity {
         ListView listView = findViewById(R.id.word_list);
         listView.setAdapter(itemsAdapter);
 
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        mPlaybackAttributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build();
+
+        mFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                .setAudioAttributes(mPlaybackAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setWillPauseWhenDucked(true)
+                .setOnAudioFocusChangeListener(new AudioManager.OnAudioFocusChangeListener() {
+                    @Override
+                    public void onAudioFocusChange(int focusChange) {
+                        switch (focusChange) {
+                            case AudioManager.AUDIOFOCUS_GAIN:
+                                mMediaPlayer.start();
+                                break;
+                            case AudioManager.AUDIOFOCUS_LOSS:
+                                releaseMediaPlayer();
+                                break;
+                            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                                // we handle all transient losses the same way because we never duck audio books
+                                mMediaPlayer.stop();
+                                mMediaPlayer.seekTo(0);
+                                break;
+                        }
+                    }
+                })
+                .build();
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                 releaseMediaPlayer();
-                mMediaPlayer = MediaPlayer.create(FamilyActivity.this, words.get(position).getAudio());
-                mMediaPlayer.setOnCompletionListener(mCompletionListener);
-                mMediaPlayer.start();
+
+                int res = mAudioManager.requestAudioFocus(mFocusRequest);
+                if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+
+                    mMediaPlayer = MediaPlayer.create(FamilyActivity.this, words.get(position).getAudio());
+                    mMediaPlayer.setOnCompletionListener(mCompletionListener);
+                    mMediaPlayer.start();
+                }
             }
         });
     }
@@ -88,6 +133,8 @@ public class FamilyActivity extends AppCompatActivity {
             // setting the media player to null is an easy way to tell that the media player
             // is not configured to play an audio file at the moment.
             mMediaPlayer = null;
+
+            mAudioManager.abandonAudioFocusRequest(mFocusRequest);
         }
     }
 }
